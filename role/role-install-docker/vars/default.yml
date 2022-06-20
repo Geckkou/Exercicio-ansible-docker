@@ -1,5 +1,5 @@
 #Aqui é o arquivo de váriaveis onde estão as váriaveis de
 ---
-create_containers: 1
-default_container_name: app_node
-default_container_image: alexandreasr/app-node-docker:1.0
+create_containers: 1 # Número de containers
+default_container_name: app_node # Nome do container
+default_container_image: alexandreasr/app-node-docker:1.0 # Nome da imagem no DockerHub

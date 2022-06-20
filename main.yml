@@ -20,13 +20,13 @@
     - name: Instala pacotes dependencias
       apt: 
         name:
-        - apt-transport-https
-        - ca-certificates 
-        - curl 
-        - software-properties-common
-        - python3-pip
-        - virtualenv
-        - python3-setuptools
+        - apt-transport-https # Instala alguns pacotes de pré-requisitos que permitem que o apt utilize pacotes via HTTPS
+        - ca-certificates # Verifica e adiciona certificados aos servidor
+        - curl # ferramenta para transferir dados de/para um servidor
+        - software-properties-common # Software que fornece uma abstração dos repositórios apt usados.
+        - python3-pip # Ferramenta para instlar e gerenciar pacotes do Python3
+        - virtualenv # Ferramenta utilizada como forma de isolar diversos ambientes de desenvolvimento (tentei usar para subir um servidor)
+        - python3-setuptools # Coleção de aprimoramento para o Python
         state: latest 
         update_cache: yes
       become: yes
@@ -43,7 +43,7 @@
         repo: deb https://download.docker.com/linux/ubuntu bionic stable
         state: present
 
-    # instala o Docker
+    # instala o Docker e atualiza os pacotes
     - name: Atualiza e instala pacotes e docker-ce 
       apt: 
         name:
@@ -52,7 +52,7 @@
         state: latest
       become: yes
   
-    # Intala dependências e pacotes do docker para python com pip
+    # Intala dependências e pacotes do docker para Python com Pip
     - name: Instala modulos e pacotes Docker para Python
       pip:
         name: 
@@ -64,7 +64,7 @@
       shell: 'docker pull alexandreasr/app-node-docker:1.0'
       become: yes
 
-    # Cria e adiciona o susario a um grupo docker para nao precisar usar o sudo com o comando docker
+    # Cria e adiciona o usuário a um grupo Docker para não precisar usar o sudo com o comando docker
     - name: Criar o grupo Docker
       shell: 'groupadd docker; usermod -aG docker vagrant;'
       become: yes
@@ -77,7 +77,7 @@
         state: present
       with_sequence: count={{ create_containers }}
 
-    # da o Start no containber já criado
+    # Da o Start no containber já criado
     - name: Rodando o Container 
       shell: 'docker start "{{ default_container_name }}"'
       
