@@ -1,0 +1,83 @@
+---
+# Declara o host e diz o caminho do arquivo de váriaveis que vai ser usado e declara acesso como sudo aos comandos
+- hosts: docker
+  become: true
+  vars_files:
+    - role/role-install-docker/vars/default.yml
+
+  # Instala o aptitude para o gerenciamento e instalação dos pacotes de dependência
+  tasks:
+    - name: Instala aptitude
+      apt: 
+        name: 
+        - aptitude 
+        state: latest 
+        update_cache: yes 
+        force_apt_get: yes
+      become: yes
+
+    # Instala os pacotes de dependências necessários
+    - name: Instala pacotes dependencias
+      apt: 
+        name:
+        - apt-transport-https
+        - ca-certificates 
+        - curl 
+        - software-properties-common
+        - python3-pip
+        - virtualenv
+        - python3-setuptools
+        state: latest 
+        update_cache: yes
+      become: yes
+
+    # Adiciona a chave GPG para o repositório oficial do Docker em seu sistema
+    - name: Adiciona chave Docker GPG
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    # Adiciona o repositório do Docker às fontes do APT
+    - name: Adiciona Repositorio Docker 
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu bionic stable
+        state: present
+
+    # instala o Docker
+    - name: Atualiza e instala pacotes e docker-ce 
+      apt: 
+        name:
+        - docker-ce
+        update_cache: yes  
+        state: latest
+      become: yes
+  
+    # Intala dependências e pacotes do docker para python com pip
+    - name: Instala modulos e pacotes Docker para Python
+      pip:
+        name: 
+        - docker
+      become: yes
+  
+    # Faz o pull da imagem docker do repositorio no dockerhub
+    - name: Faz o pull da imagem do dockerhub
+      shell: 'docker pull alexandreasr/app-node-docker:1.0'
+      become: yes
+
+    # Cria e adiciona o susario a um grupo docker para nao precisar usar o sudo com o comando docker
+    - name: Criar o grupo Docker
+      shell: 'groupadd docker; usermod -aG docker vagrant;'
+      become: yes
+
+    # Cria o container da imagem baixada
+    - name: Create default containers
+      docker_container:
+        name: "{{ default_container_name }}"
+        image: "{{ default_container_image }}"
+        state: present
+      with_sequence: count={{ create_containers }}
+
+    # da o Start no containber já criado
+    - name: Rodando o Container 
+      shell: 'docker start "{{ default_container_name }}"'
+      
